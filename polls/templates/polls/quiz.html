@@ -1,0 +1,65 @@
+{% extends "polls/base.html" %}
+
+{% block body_block %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
+
+<div class="page-header">
+  <div id="navbar" class="navbar-collapse collapse">
+      <form class="navbar-form" method="post" action="{% url 'polls:question_filter' %}">
+             <!-- avoid CSRF verification failed error. -->
+             {% csrf_token %}
+          <div class="form-group">
+             <input name="question_text" type="text" placeholder="Question text" class="form-control" value="{{ search_question }}">
+             <input name="question_date" type="date" class="form-control" value="{{ search_date }}">
+          </div>
+          <button type="submit" class="btn btn-success">Search</button>
+      </form>
+  </div>
+</div>
+
+<div class="container">
+    <h1>Preguntas </h1>
+    {% if user.is_authenticated %}
+        <h2>Bienvenido {{ user.username }}</h2>
+
+        {% if latest_question_list %}
+            <ul>
+            {% for question in latest_question_list %}
+            <li><a href="{% url 'polls:details' question.id %}">{{ question.question_text }}</a></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No polls are available.</p>
+        {% endif %}
+    {% else %}
+        <h2>Regístrate o inicia sesión</h2>
+    {% endif %}
+</div>
+
+<ul class="pagination">
+  <!-- previous page link -->
+  {% if latest_question_list.has_previous %}
+      <li><a href="{{ base_url }}page={{ latest_question_list.previous_page_number }}">&laquo;</a></li>
+  {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+  {% endif %}
+  <!-- page number link-->
+  {% for i in paginator.page_range %}
+       {% if latest_question_list.number == i %}
+          <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+       {% else %}
+          <li><a href="{{ base_url }}page={{ i }}">{{ i }}</a></li>
+       {% endif %}
+  {% endfor %}
+  <!-- next page link -->
+  {% if latest_question_list.has_next %}
+
+      <li><a href="{{ base_url }}page={{ latest_question_list.next_page_number }}">&raquo;</a></li>
+  {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+  {% endif %}
+</ul>
+
+
+{% endblock %}
